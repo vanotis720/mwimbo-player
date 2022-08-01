@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 /* eslint-disable eol-last */
 /* eslint-disable prettier/prettier */
 import React, { useContext } from 'react';
@@ -20,7 +21,7 @@ const { width } = Dimensions.get('window');
 // };
 
 const Home = ({ navigation }) => {
-    const { isPlaying, currentTrack, progress, resetPlayBack, handlePlayback, handleSkipToNext,
+    const { isPlaying, currentTrack, progress, handlePlayPause, handleSkipToNext,
         handleSkipToPrevious, handleSeek } = useContext(AppContext);
 
     console.log('isPlaying ' + isPlaying);
@@ -30,7 +31,7 @@ const Home = ({ navigation }) => {
 
     const handlePlay = () => {
         console.log('handlePlay');
-        handlePlayback();
+        handlePlayPause();
         console.log('currentTrack');
         console.log(currentTrack);
     };
@@ -59,7 +60,9 @@ const Home = ({ navigation }) => {
                         minimumTrackTintColor="#280D9F"
                         maximumTrackTintColor="#FFF"
                         thumbTintColor="#280D9F"
-                        onSlidingComplete={resetPlayBack}
+                        // onValueChange={value => handleSeek(value)}
+                        onSlidingComplete={value => handleSeek(value)}
+                        disabled={currentTrack === null ? true : false}
                     />
                 </View>
                 <View style={styles.playerSliderTime}>
@@ -68,31 +71,36 @@ const Home = ({ navigation }) => {
                     </Text>
                 </View>
             </View>
-            <View style={styles.playerControls}>
+            <View style={[styles.playerControls, { opacity: currentTrack === null ? 0.4 : 1 }]}>
                 <View style={styles.playerControls__upper}>
                     <TouchableOpacity
                         onPress={handleSkipToPrevious}
+                        disabled={currentTrack === null ? true : false}
                     >
                         <MaterialCommunityIcons name="skip-previous" size={30} color="#FFF" />
                     </TouchableOpacity>
                     <TouchableOpacity
-                        onPress={(position) => handleSeek(position - 10)}
+                        onPress={(position) => handleSeek(progress.position - 10)}
+                        disabled={currentTrack === null ? true : false}
                     >
                         <MaterialIcons name="replay-10" size={40} color="#FFF" />
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.playBtnCover}
                         onPress={handlePlay}
+                        disabled={currentTrack === null ? true : false}
                     >
                         <MaterialCommunityIcons name={isPlaying ? 'pause' : 'play'} size={50} color="#FFF" />
                     </TouchableOpacity>
                     <TouchableOpacity
-                        onPress={(position) => handleSeek(position + 10)}
+                        onPress={(position) => handleSeek(progress.position + 10)}
+                        disabled={currentTrack === null ? true : false}
                     >
                         <MaterialIcons name="forward-10" size={40} color="#FFF" />
                     </TouchableOpacity>
                     <TouchableOpacity
                         onPress={handleSkipToNext}
+                        disabled={currentTrack === null ? true : false}
                     >
                         <MaterialCommunityIcons name="skip-next" size={30} color="#FFF" />
                     </TouchableOpacity>

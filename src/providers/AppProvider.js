@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useEffect, useState } from 'react';
-import TrackPlayer, { State, Capability, useProgress, Event, useTrackPlayerEvents } from 'react-native-track-player';
+import TrackPlayer, { Capability, useProgress, Event, useTrackPlayerEvents } from 'react-native-track-player';
 import MusicFiles, { RNAndroidAudioStore } from 'react-native-get-music-files';
 
 export const AppContext = createContext();
@@ -56,28 +56,34 @@ export const AppProvider = ({ children }) => {
             });
     };
 
-    const handleInitPlayList = async () => {
-        await TrackPlayer.add([tracks]);
-        await TrackPlayer.play();
+    const handleInitPlayList = async (playlist, trackIndex) => {
+        await TrackPlayer.add([playlist]);
+        await TrackPlayer.skip(trackIndex);
     };
 
     const initializePlayer = async () => {
         try {
-            await TrackPlayer.setupPlayer({});
-            await TrackPlayer.updateOptions({
-                stopWithApp: true,
-                capabilities: [
-                    Capability.Play,
-                    Capability.Pause,
-                    Capability.SkipToNext,
-                    Capability.SkipToPrevious,
-                    Capability.Stop,
-                ],
-                compactCapabilities: [Capability.Play, Capability.Pause],
-            });
-
-        } catch (e) {
-            console.log(e);
+            await TrackPlayer.setupPlayer({})
+                .then(() => {
+                    TrackPlayer.updateOptions({
+                        stopWithApp: true,
+                        capabilities: [
+                            Capability.Play,
+                            Capability.Pause,
+                            Capability.SkipToNext,
+                            Capability.SkipToPrevious,
+                            Capability.Stop,
+                        ],
+                        compactCapabilities: [Capability.Play, Capability.Pause],
+                    });
+                    setIsLoading(false);
+                }
+                ).catch((error) => {
+                    console.log(error);
+                }
+                );
+        } catch (error) {
+            console.log(error);
         }
     };
 
@@ -85,34 +91,22 @@ export const AppProvider = ({ children }) => {
         TrackPlayer.reset();
     };
 
-    const getState = async () => {
-        const playerState = await TrackPlayer.getState();
-        if (playerState === State.Playing) {
-            setIsPlaying(true);
-        }
-        else if (playerState === State.Paused) {
-            setIsPlaying(false);
-        }
-    };
-
     const handleCurrentTrack = async () => {
         let trackIndex = await TrackPlayer.getCurrentTrack();
-        console.log('trackIndex', trackIndex);
         let trackObject = await TrackPlayer.getTrack(trackIndex);
         setCurrentTrack(trackObject);
     };
 
-    const handlePlayback = async () => {
+    const handlePlayPause = async () => {
         if (isPlaying) {
             await TrackPlayer.pause();
+            setIsPlaying(false);
         } else {
-            if (currentTrack === null) {
-                handleInitPlayList();
-                handleCurrentTrack();
+            if (currentTrack !== null) {
+                await TrackPlayer.play();
+                setIsPlaying(true);
             }
-            await TrackPlayer.play();
         }
-        setIsPlaying(!isPlaying);
     };
 
     const handleSkipToNext = async () => {
@@ -145,13 +139,10 @@ export const AppProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        getSongs();
-        getArtists();
-        getAlbums();
-        initializePlayer();
-        getState;
-        handleCurrentTrack();
-        setIsLoading(false);
+        getSongs(); // get songs
+        getArtists(); // get artists
+        getAlbums(); // get albums
+        initializePlayer(); // initialize player
     }, []);
 
     return (
@@ -165,7 +156,7 @@ export const AppProvider = ({ children }) => {
                 currentTrack,
                 isLoading,
                 resetPlayBack,
-                handlePlayback,
+                handlePlayPause,
                 handleSkipToNext,
                 handleSkipToPrevious,
                 handleStop,
