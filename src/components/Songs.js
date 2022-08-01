@@ -16,14 +16,21 @@ import SongItem from './Atoms/SongItem';
 const { width } = Dimensions.get('window');
 
 const Songs = () => {
-    const { tracks, isLoading } = useContext(AppContext);
+    const { tracks, isLoading, handleInitPlayList } = useContext(AppContext);
+
+    const handlePlaySong = (track) => {
+        console.log('===============handle play song=====================');
+        console.log(track);
+        console.log('================end handle play====================');
+        handleInitPlayList([tracks]);
+    };
 
     return (
         <View style={styles.container}>
             <StatusBar />
             {
-                isLoading ? (
-                    <ActivityIndicator size="large" color="#0000ff" />
+                isLoading || tracks.length === 0 ? (
+                    <ActivityIndicator size="large" color="#fff" />
                 ) : (
                     <>
                         <View style={styles.topSection}>
@@ -32,7 +39,7 @@ const Songs = () => {
                         </View>
                         <View style={styles.downSection}>
                             <FlatList data={tracks} renderItem={({ item }) => (
-                                <SongItem song={item} />
+                                <SongItem song={item} handlePlaySong={handlePlaySong} />
                             )} />
                         </View>
                     </>
@@ -46,6 +53,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#280D9F',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     topSection: {
         flex: 1,

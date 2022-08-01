@@ -23,15 +23,8 @@ export const AppProvider = ({ children }) => {
         }
     });
 
-    const getSongs = async () => {
-        await MusicFiles.getAll({
-            blured: true,
-            artist: true,
-            duration: true,
-            cover: true,
-            title: true,
-            minimumSongDuration: 10000,
-        }).then((titles) => {
+    const getSongs = () => {
+        RNAndroidAudioStore.getSongs({}).then((titles) => {
             setTracks(titles);
         }).catch((error) => {
             console.log(error);
@@ -56,15 +49,30 @@ export const AppProvider = ({ children }) => {
             });
     };
 
-    const handleInitPlayList = async (playlist, trackIndex) => {
-        await TrackPlayer.add([playlist]);
-        await TrackPlayer.skip(trackIndex);
+    const handleInitPlayList = async (playlist, trackIndex = null) => {
+        try {
+            await TrackPlayer.add(playlist);
+            if (trackIndex !== null) {
+                await TrackPlayer.skip(trackIndex);
+            }
+            else {
+                await TrackPlayer.play();
+            }
+        } catch (error) {
+            console.log('==============handle init error');
+            console.log(error);
+        }
+        console.log('============== handle init playlist ======================');
+        console.log(currentTrack);
+        console.log('===============end handle init =====================');
     };
 
     const initializePlayer = async () => {
         try {
             await TrackPlayer.setupPlayer({})
-                .then(() => {
+                .then((player) => {
+                    console.log('============player instance');
+                    console.log(player);
                     TrackPlayer.updateOptions({
                         stopWithApp: true,
                         capabilities: [
@@ -161,6 +169,7 @@ export const AppProvider = ({ children }) => {
                 handleSkipToPrevious,
                 handleStop,
                 handleSeek,
+                handleInitPlayList,
             }}>
             {children}
         </AppContext.Provider>

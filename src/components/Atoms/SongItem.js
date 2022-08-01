@@ -5,14 +5,22 @@ import React from "react";
 import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import { formatDuration } from "../../helpers/cast";
 
-const SongItem = ({ song }) => {
-    const { title, artist, duration, cover, fileName, url } = song;
+const SongItem = ({ song, handlePlaySong }) => {
+    const { title, artist, duration, cover, fileName, path } = song;
+
+    // console.log('====================================');
+    // console.log(song);
+    // console.log('====================================');
 
     return (
         <TouchableOpacity
             style={styles.SongItem}
             onPress={() => {
-                console.log('clicked');
+                handlePlaySong({
+                    title, artist, duration, fileName,
+                    url: 'file://' + path,
+                    artwork: '',
+                });
             }}
         >
             <View style={styles.songItem__left}>

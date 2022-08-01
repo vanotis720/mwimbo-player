@@ -18,3 +18,7 @@ export function formatDurationFromSeconds(seconds) {
             minutes + ":" + (seconds < 10 ? "0" : "") + seconds
     );
 }
+
+// export function updateArrayValue($array) {
+
+// }
